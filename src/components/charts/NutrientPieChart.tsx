@@ -1,17 +1,28 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { motion } from "framer-motion";
 import React from "react";
 
-type NutrientPieChartProps = {
+export interface Nutrients {
   protein: number;
   carbs: number;
   fat: number;
-};
+}
+
+export interface NutrientPieChartProps {
+  nutrients: Nutrients;
+}
 
 const COLORS = ["#4F46E5", "#10B981", "#F59E0B"];
 
-const NutrientPieChart: React.FC<NutrientPieChartProps> = ({ protein, carbs, fat }) => {
-  const total = protein + carbs + fat;
+const NutrientPieChart: React.FC<NutrientPieChartProps> = ({ nutrients }) => {
+  const { protein, carbs, fat } = nutrients;
 
   const data = [
     { name: "Proteínas", value: protein },
@@ -38,8 +49,8 @@ const NutrientPieChart: React.FC<NutrientPieChartProps> = ({ protein, carbs, fat
             cy="50%"
             labelLine={false}
             label={({ name, percent }) =>
-                percent !== undefined ? `${name} ${(percent * 100).toFixed(0)}%` : name
-              }              
+              percent !== undefined ? `${name} ${(percent * 100).toFixed(0)}%` : name
+            }
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"

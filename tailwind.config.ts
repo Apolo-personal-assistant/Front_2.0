@@ -1,16 +1,17 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
   content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/styles/**/*.{css}",  // <--- Asegura que incluya tus estilos
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#4F46E5',    // Ejemplo de un azul índigo
-          dark: '#3730A3',
+          DEFAULT: "#4F46E5",
+          dark: "#3730A3",
         },
       },
     },

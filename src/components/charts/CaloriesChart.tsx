@@ -1,16 +1,29 @@
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LabelList } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  LabelList,
+} from "recharts";
 import { motion } from "framer-motion";
 import React from "react";
 
-type CaloriesChartProps = {
-  data: {
-    day: string;
-    calories: number;
-    goal: number;
-  }[];
-};
+export interface CaloriesChartProps {
+  daily: number;
+  goal: number;
+}
 
-const CaloriesChart: React.FC<CaloriesChartProps> = ({ data }) => {
+const CaloriesChart: React.FC<CaloriesChartProps> = ({ daily, goal }) => {
+  const data = [
+    {
+      day: "Hoy",
+      calories: daily,
+      goal: goal,
+    },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}

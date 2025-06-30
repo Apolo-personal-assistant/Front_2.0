@@ -1,14 +1,18 @@
 import React from "react";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "../hooks/useUser";
 import { Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import Card from "@/components/ui/Card";
-import Avatar from "@/components/ui/Avatar";
-import { getAiLogs } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { FaRobot, FaRegClock } from "react-icons/fa";
-import { FiActivity } from "react-icons/fi";
-import { MdHistory } from "react-icons/md";
+import { getAiLogs, getProgressSummary } from "../lib/api";
+
+import { Flame, PieChart, Activity, History } from "lucide-react";
+import Avatar from "../components/ui/Avatar";
+import Card from "../components/ui/Card";
+import Header from "../components/layout/Header";
+
+import CaloriesChart from "../components/charts/CaloriesChart";
+import NutrientPieChart from "../components/charts/NutrientPieChart";
+import ProgressBar from "../components/charts/ProgressBar";
 
 interface AiLog {
   _id: string;
@@ -19,120 +23,140 @@ interface AiLog {
 
 const Dashboard: React.FC = () => {
   const { user } = useUser();
-
   if (!user) return <Navigate to="/login" />;
 
-  const {
-    data: allLogs = [],
-    isLoading: loadingLogs,
-  } = useQuery<AiLog[]>({
+  const { data: allLogs = [], isLoading } = useQuery<AiLog[]>({
     queryKey: ["user-ai-logs"],
     queryFn: getAiLogs,
   });
 
-  // ✅ Filtrar logs del usuario actual
-  const logs = allLogs.filter((log) => log.user_id === user._id);
+  const { data: summary } = useQuery({
+    queryKey: ["progress-summary"],
+    queryFn: getProgressSummary,
+  });
+
+  const logs = allLogs.filter((log) => log.user_id === user.id);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.42, 0, 0.58, 1] }}
-      className="min-h-screen px-6 py-10 bg-gradient-to-b from-white to-gray-100 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-white font-sans"
-    >
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Header */}
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white font-sans">
+      <Header />
+
+      <main className="flex-1 w-full px-0 py-12">
         <motion.div
-          initial={{ opacity: 0, x: -12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center gap-4"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-4 px-6 mb-12"
         >
-          <Avatar src={user.avatarUrl} alt={user.name} size="lg" />
+          <Avatar src={user.avatarUrl} alt={user.full_name} name={user.full_name} size="lg" />
           <div>
-            <h1 className="text-3xl font-bold tracking-tight leading-snug">
-              Bienvenido de nuevo, {user.name}
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              ¡Bienvenido de nuevo, {user.full_name}!
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Aquí puedes revisar tu actividad más reciente con la IA
+            <p className="text-gray-400 text-sm mt-1">
+              Aquí puedes revisar tu actividad más reciente con la IA.
             </p>
           </div>
         </motion.div>
 
-        {/* Estadísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <motion.div whileHover={{ scale: 1.03 }}>
-            <Card className="hover:shadow-2xl transition">
-              <div className="flex items-center justify-between">
+        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6 mb-12">
+          <motion.div whileHover={{ scale: 1.01 }} className="transition-all">
+            <Card className="bg-gray-800 hover:shadow-lg">
+              <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Interacciones totales</p>
-                  <h2 className="text-3xl font-bold">
-                    {loadingLogs ? "..." : logs.length}
-                  </h2>
+                  <p className="text-sm text-gray-400">Interacciones totales</p>
+                  <h2 className="text-3xl font-bold">{isLoading ? "..." : logs.length}</h2>
                 </div>
-                <FaRobot className="text-4xl text-primary" />
+                <Flame className="w-6 h-6 text-primary" />
               </div>
             </Card>
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.03 }}>
-            <Card className="hover:shadow-2xl transition">
-              <div className="flex items-center justify-between">
+          <motion.div whileHover={{ scale: 1.01 }} className="transition-all">
+            <Card className="bg-gray-800 hover:shadow-lg">
+              <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Actividad reciente</p>
-                  <h2 className="text-3xl font-bold">
-                    {loadingLogs ? "..." : logs[0]?.prompt.length || 0}
-                  </h2>
+                  <p className="text-sm text-gray-400">Actividad reciente</p>
+                  <h2 className="text-3xl font-bold">{logs[0]?.prompt?.length || 0}</h2>
                 </div>
-                <FiActivity className="text-4xl text-emerald-500" />
+                <Activity className="w-6 h-6 text-green-500" />
               </div>
             </Card>
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.03 }}>
-            <Card className="hover:shadow-2xl transition">
-              <div className="flex items-center justify-between">
+          <motion.div whileHover={{ scale: 1.01 }} className="transition-all">
+            <Card className="bg-gray-800 hover:shadow-lg">
+              <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Última interacción</p>
+                  <p className="text-sm text-gray-400">Última interacción</p>
                   <h2 className="text-3xl font-bold">
-                    {loadingLogs ? "..." : new Date(logs[0]?.created_at || "").toLocaleDateString()}
+                    {logs[0]?.created_at ? new Date(logs[0].created_at).toLocaleDateString() : "Sin datos"}
                   </h2>
                 </div>
-                <MdHistory className="text-4xl text-indigo-500" />
+                <History className="w-6 h-6 text-indigo-400" />
               </div>
             </Card>
           </motion.div>
-        </div>
+        </section>
 
-        {/* Historial */}
-        <Card title="Historial reciente de prompts">
-          <div className="overflow-x-auto rounded-lg">
-            <table className="min-w-full text-sm text-left table-auto border-collapse">
-              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Prompt</th>
-                  <th className="px-4 py-3 font-medium">Fecha</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                {logs.slice(0, 5).map((log) => (
-                  <tr
-                    key={log._id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-                  >
-                    <td className="px-4 py-3 max-w-[400px] truncate">{log.prompt}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                      <FaRegClock />
-                      {new Date(log.created_at || "").toLocaleDateString()}
-                    </td>
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 mb-12">
+          <Card title="Calorías consumidas hoy" className="bg-gray-800">
+            <CaloriesChart daily={summary?.daily || 0} goal={summary?.goal || 2000} />
+          </Card>
+          <Card title="Distribución de macronutrientes" className="bg-gray-800">
+            <NutrientPieChart
+              nutrients={{
+                protein: summary?.nutrients?.protein || 0,
+                carbs: summary?.nutrients?.carbs || 0,
+                fat: summary?.nutrients?.fat || 0,
+              }}
+            />
+          </Card>
+        </section>
+
+        <section className="px-6 w-full mb-12">
+          <Card title="Progreso semanal de calorías" className="bg-gray-800">
+            <ProgressBar
+              label="Progreso semanal de calorías"
+              value={summary?.weekly || 0}
+              goal={(summary?.goal || 2000) * 7}
+            />
+          </Card>
+        </section>
+
+        <section className="px-6 w-full">
+          <Card title="Historial reciente de prompts" className="bg-gray-800">
+            <div className="overflow-x-auto rounded-lg">
+              <table className="min-w-full text-sm table-auto">
+                <thead className="bg-gray-700 text-gray-300">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold">Prompt</th>
+                    <th className="px-4 py-3 text-left font-semibold">Fecha</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
-    </motion.div>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {logs.slice(0, 5).map((log) => (
+                    <tr key={log._id} className="hover:bg-gray-700/50 transition-colors">
+                      <td className="px-4 py-2 truncate max-w-[400px]">{log.prompt}</td>
+                      <td className="px-4 py-2 text-gray-400">
+                        {new Date(log.created_at || "").toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                  {logs.length === 0 && (
+                    <tr>
+                      <td colSpan={2} className="px-4 py-3 text-center text-gray-500">
+                        No hay prompts recientes aún.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </section>
+      </main>
+    </div>
   );
 };
 

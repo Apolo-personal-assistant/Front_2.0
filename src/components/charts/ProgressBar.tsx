@@ -2,17 +2,19 @@ import React from "react";
 import { motion } from "framer-motion";
 
 interface ProgressBarProps {
-  label: string;
+  label?: string;
   value: number;
   goal: number;
-  color?: string; 
+  color?: string;
+  unit?: string; // <- opcional para mostrar g, kcal, etc.
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
-  label,
+  label = "Progreso",
   value,
   goal,
   color = "bg-blue-600",
+  unit = "kcal", // por defecto calorías
 }) => {
   const percentage = Math.min((value / goal) * 100, 100);
   const remaining = Math.max(goal - value, 0);
@@ -22,9 +24,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       <div className="flex justify-between text-sm text-gray-700 dark:text-gray-300 font-medium">
         <span>{label}</span>
         <span>
-          {value} / {goal}
+          {value} / {goal} {unit}
         </span>
       </div>
+
       <div className="w-full h-4 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
         <motion.div
           className={`h-full ${color} rounded-full`}
@@ -33,9 +36,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         />
       </div>
+
       {remaining > 0 && (
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Faltan {remaining}g para alcanzar tu meta
+          Faltan {remaining} {unit} para alcanzar tu meta
         </p>
       )}
     </div>
